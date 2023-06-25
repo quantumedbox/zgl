@@ -1,4 +1,4 @@
-﻿//
+//
 // This code file is licenced under any of Public Domain, WTFPL or CC0.
 // There are no restrictions in the use of this file.
 //

@@ -624,11 +624,10 @@ pub fn bufferUninitialized(target: BufferTarget, comptime T: type, count: usize,
 }
 
 pub fn bufferSubData(target: BufferTarget, offset: usize, comptime T: type, items: []align(1) const T) void {
-    binding.bufferSubData(
-        @enumToInt(target), 
-        @intCast(binding.GLintptr, offset), 
-        cs2gl(@sizeOf(T) * items.len), items.ptr
-    );
+    binding.bufferSubData(@enumToInt(target), @intCast(
+        binding.GLintptr,
+        offset,
+    ), cs2gl(@sizeOf(T) * items.len), items.ptr);
     checkError();
 }
 
@@ -735,6 +734,10 @@ pub const BufferMapFlags = packed struct {
     write: bool = false,
     persistent: bool = false,
     coherent: bool = false,
+    invalidate_range: bool = false,
+    invalidate_buffer: bool = false,
+    flush_explicit: bool = false,
+    unsynchronized: bool = false,
 };
 
 pub fn mapBufferRange(
@@ -749,6 +752,10 @@ pub fn mapBufferRange(
     if (flags.write) flag_bits |= binding.MAP_WRITE_BIT;
     if (flags.persistent) flag_bits |= binding.MAP_PERSISTENT_BIT;
     if (flags.coherent) flag_bits |= binding.MAP_COHERENT_BIT;
+    if (flags.invalidate_range) flag_bits |= binding.MAP_INVALIDATE_RANGE_BIT;
+    if (flags.invalidate_buffer) flag_bits |= binding.MAP_INVALIDATE_BUFFER_BIT;
+    if (flags.flush_explicit) flag_bits |= binding.MAP_FLUSH_EXPLICIT_BIT;
+    if (flags.unsynchronized) flag_bits |= binding.MAP_UNSYNCHRONIZED_BIT;
 
     const ptr = binding.mapBufferRange(
         @enumToInt(target),
@@ -774,6 +781,10 @@ pub fn mapNamedBufferRange(
     if (flags.write) flag_bits |= binding.MAP_WRITE_BIT;
     if (flags.persistent) flag_bits |= binding.MAP_PERSISTENT_BIT;
     if (flags.coherent) flag_bits |= binding.MAP_COHERENT_BIT;
+    if (flags.invalidate_range) flag_bits |= binding.MAP_INVALIDATE_RANGE_BIT;
+    if (flags.invalidate_buffer) flag_bits |= binding.MAP_INVALIATE_BUFFER_BIT;
+    if (flags.flush_explicit) flag_bits |= binding.MAP_FLUSH_EXPLICIT_BIT;
+    if (flags.unsynchronized) flag_bits |= binding.MAP_UNSYNCHRONIZED_BIT;
 
     const ptr = binding.mapNamedBufferRange(
         @enumToInt(buf),
@@ -1230,34 +1241,6 @@ pub fn uniform3uiv(location: ?u32, items: []const [3]u32) void {
 pub fn uniform4uiv(location: ?u32, items: []const [4]u32) void {
     if (location) |loc| {
         binding.uniform4uiv(@intCast(types.Int, loc), cs2gl(items.len), @ptrCast(*const u32, items.ptr));
-        checkError();
-    }
-}
-
-pub fn uniform1i64(location: ?u32, v0: i64) void {
-    if (location) |loc| {
-        binding.uniform1i64ARB(@intCast(types.Int, loc), v0);
-        checkError();
-    }
-}
-
-pub fn uniform2i64(location: ?u32, v0: i64, v1: i64) void {
-    if (location) |loc| {
-        binding.uniform2i64ARB(@intCast(types.Int, loc), v0, v1);
-        checkError();
-    }
-}
-
-pub fn uniform3i64(location: ?u32, v0: i64, v1: i64, v2: i64) void {
-    if (location) |loc| {
-        binding.uniform3i64ARB(@intCast(types.Int, loc), v0, v1, v2);
-        checkError();
-    }
-}
-
-pub fn uniform4i64(location: ?u32, v0: i64, v1: i64, v2: i64, v3: i64) void {
-    if (location) |loc| {
-        binding.uniform4i64ARB(@intCast(types.Int, loc), v0, v1, v2, v3);
         checkError();
     }
 }
